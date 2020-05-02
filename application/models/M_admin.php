@@ -3,6 +3,12 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class M_admin extends CI_Model
 {
+    public function delete($where, $table)
+    {
+        $this->db->where($where);
+        $this->db->delete($table);
+    }
+
     public function get_lokasi()
     {
         $this->db->join('tb_prodi', 'tb_lokasi.id_prodi=tb_prodi.id_prodi');
@@ -10,6 +16,7 @@ class M_admin extends CI_Model
         $lokasi = $this->db->get('tb_lokasi')->result_array();
         return $lokasi;
     }
+
     function get_lokasi_byId($id)
     {
         $this->db->join('tb_prodi', 'tb_lokasi.id_prodi=tb_prodi.id_prodi');
@@ -19,19 +26,27 @@ class M_admin extends CI_Model
         return $lokasi;
     }
 
-    function get_dataset_byId($id)
+    function save_lokasi()
+    {
+        $data = array(
+            'id_prodi' => $_POST['id_prodi'],
+            'nama_lab' => $_POST['lab']
+        );
+        $this->db->insert('tb_lokasi', $data);
+    }
+
+    //data aset
+    function get_aset_byId($id)
     {
         $this->db->join('tb_lokasi', 'tb_lokasi.id_lokasi=tb_aset.id_lokasi');
         $this->db->where('kode_aset=', $id);
-        $this->db->order_by('kode_aset', 'desc');
         $aset = $this->db->get('tb_aset')->row_array();
         return $aset;
     }
 
-    function get_dataset()
+    function get_dataaset()
     {
         $this->db->join('tb_lokasi', 'tb_lokasi.id_lokasi=tb_aset.id_lokasi');
-        $this->db->order_by('kode_aset', 'desc');
         $aset = $this->db->get('tb_aset')->result_array();
         return $aset;
     }
