@@ -3,215 +3,214 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Admin extends CI_Controller
 {
-    public function __construct()
-    {
-        parent::__construct();
-        is_logged_in();
-        $this->load->helper('url');
-        $this->load->model('M_admin');
-    }
+	public function __construct()
+	{
+		parent::__construct();
+		is_logged_in();
+		$this->load->helper('url');
+		$this->load->model('M_admin');
+	}
 
-    public function index()
-    {
-        $data['title'] = 'Halaman Utama Admin';
-        $data['account'] = $this->db->get_where('tb_user', ['email' =>
-        $this->session->userdata('email')])->row_array();
+	public function index()
+	{
+		$data['title'] = 'Halaman Utama Admin';
+		$data['account'] = $this->db->get_where('tb_user', ['email' =>
+		$this->session->userdata('email')])->row_array();
 
-        $this->load->view('templates/header', $data);
-        $this->load->view('admin/sidebar', $data);
-        $this->load->view('templates/topbar', $data);
-        $this->load->view('admin/index', $data);
-        $this->load->view('templates/footer');
-    }
+		$this->load->view('templates/header', $data);
+		$this->load->view('admin/sidebar', $data);
+		$this->load->view('templates/topbar', $data);
+		$this->load->view('admin/index', $data);
+		$this->load->view('templates/footer');
+	}
 
-    //user
-    public function data_user()
-    {
-        $data['title'] = 'Halaman Data User';
-        $data['account'] = $this->db->get_where('tb_user', ['email' =>
-        $this->session->userdata('email')])->row_array();
+	public function profile()
+	{
+		$data['title'] = 'My Profile';
+		$data['account'] = $this->db->get_where('tb_user', ['email' =>
+		$this->session->userdata('email')])->row_array();
 
-        $data['user'] = $this->db->get_where('tb_user', ['name' => $this->session->userdata('name')])->row_array();
-        $data['user'] = $this->db->get('tb_user')->result_array();
+		$this->load->view('templates/header', $data);
+		$this->load->view('admin/sidebar', $data);
+		$this->load->view('templates/topbar', $data);
+		$this->load->view('admin/profile', $data);
+		$this->load->view('templates/footer');
+	}
 
-        $this->load->view('templates/header', $data);
-        $this->load->view('admin/sidebar', $data);
-        $this->load->view('templates/topbar', $data);
-        $this->load->view('admin/data_user', $data);
-        $this->load->view('templates/footer');
-    }
+	//data tunggal
+	public function data_tunggal()
+	{
+		$data['title'] = 'Data Tunggal';
+		$data['account'] = $this->db->get_where('tb_user', ['email' =>
+		$this->session->userdata('email')])->row_array();
 
-    public function delete_user($id)
-    {
-        $where = array('id_user' => $id);
-        $this->M_admin->delete($where, 'tb_user');
-        redirect('admin/data_user');
-    }
+		//load library
+		$this->load->library('pagination');
 
-    //end user
+		//config
+		$config['base_url'] = site_url('admin/data_tunggal');
+		$config['total_rows'] = $this->M_admin->getTunggal();
+		$config['per_page'] = 10;
+		$config['num_links'] = 4;
 
-    //data prodi
-    public function data_prodi()
-    {
-        $data['title'] = 'Halaman Data Prodi';
-        $data['account'] = $this->db->get_where('tb_user', ['email' =>
-        $this->session->userdata('email')])->row_array();
+		//styling
+		$config['full_tag_open'] = '<nav aria-label="Page navigation example"><ul class="pagination">';
+		$config['full_tag_close'] = '</ul></nav>';
 
-        $data['prodi'] = $this->db->get('tb_prodi')->result_array();
+		$config['first_link'] = 'First';
+		$config['first_tag_open'] = '<li class="page-item">';
+		$config['first_tag_close'] = '</li>';
 
-        $this->load->view('templates/header', $data);
-        $this->load->view('admin/sidebar', $data);
-        $this->load->view('templates/topbar', $data);
-        $this->load->view('admin/data_prodi', $data);
-        $this->load->view('templates/footer');
+		$config['last_link'] = 'Last';
+		$config['last_tag_open'] = '<li class="page-item">';
+		$config['last_tag_close'] = '</li>';
 
-        $this->form_validation->set_rules('nama_prodi', 'Nama Prodi', 'required');
-        $this->form_validation->set_rules('jurusan', 'Nama Jurusan', 'required');
-        $this->form_validation->set_rules('fakultas', 'Nama Fakultas', 'required');
+		$config['next_link'] = '&raquo';
+		$config['next_tag_open'] = '<li class="page-item">';
+		$config['next_tag_close'] = '</li>';
 
-        if ($this->form_validation->run() == FALSE) {
-        } else {
-            $data = [
-                'nama_prodi'   => $this->input->post('nama_prodi'),
-                'jurusan'   => $this->input->post('jurusan'),
-                'fakultas'   => $this->input->post('fakultas')
-            ];
+		$config['prev_link'] = '&laquo';
+		$config['prev_tag_open'] = '<li class="page-item">';
+		$config['prev_tag_close'] = '</li>';
 
-            $this->db->insert('tb_prodi', $data);
-            $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">New Data Lokasi Added!</div>');
-            redirect('admin/data_prodi');
-        }
-    }
+		$config['cur_tag_open'] = '<li class="page-item active"><a class="page-link" href="#">';
+		$config['cur_tag_close'] = '</a></li>';
 
-    public function delete_prodi($id)
-    {
-        $where = array('id_prodi' => $id);
-        $this->M_admin->delete($where, 'tb_prodi');
-        redirect('admin/data_prodi');
-    }
+		$config['num_tag_open'] = '<li class="page-item">';
+		$config['num_tag_close'] = '</li>';
 
-    //end data prodi
+		$config['attributes'] = array('class' => 'page-link');
 
-    // data lokasi 
-    public function data_lokasi()
-    {
-        $data['title'] = 'Halaman Data Lokasi';
-        $data['account'] = $this->db->get_where('tb_user', ['email' =>
-        $this->session->userdata('email')])->row_array();
+		//initialize
+		$this->pagination->initialize($config);
 
-        $data['lokasi'] = $this->M_admin->get_lokasi();
-        $data['prodi'] = $this->db->get('tb_prodi')->result_array();
+		$data['start'] = $this->uri->segment(3);
+		$data['datatunggal'] = $this->M_admin->getDataTunggal($config['per_page'], $data['start']);
 
-        $this->load->view('templates/header', $data);
-        $this->load->view('admin/sidebar', $data);
-        $this->load->view('templates/topbar', $data);
-        $this->load->view('admin/data_lokasi/data_lokasi', $data);
-        $this->load->view('templates/footer');
+		$this->form_validation->set_rules('skor', 'Skor', 'required');
 
-        $this->form_validation->set_rules('id_prodi', 'Nama Prodi', 'required');
-        $this->form_validation->set_rules('nama_lab', 'Nama Lab', 'required');
+		if ($this->form_validation->run() == FALSE) {
+		} else {
+			$data = [
+				'skor'   => $this->input->post('skor'),
+			];
 
-        if ($this->form_validation->run() == FALSE) {
-        } else {
-            $data = [
-                'id_prodi'   => $this->input->post('id_prodi'),
-                'nama_lab'   => $this->input->post('nama_lab')
-            ];
+			$this->db->insert('tb_databergolong', $data);
+			$this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">New Skor Added!</div>');
+			redirect('admin/data_tunggal');
+		}
 
-            $this->db->insert('tb_lokasi', $data);
-            $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">New Data Lokasi Added!</div>');
-            redirect('admin/data_lokasi');
-        }
-    }
+		$this->load->view('templates/header', $data);
+		$this->load->view('admin/sidebar', $data);
+		$this->load->view('templates/topbar', $data);
+		$this->load->view('admin/data_tunggal', $data);
+		$this->load->view('templates/footer');
+	}
 
-    public function delete_lokasi($id)
-    {
-        $where = array('id_lokasi' => $id);
-        $this->M_admin->delete($where, 'tb_lokasi');
-        redirect('admin/data_lokasi');
-    }
-    //end data lokasi
+	public function delete_tunggal($id)
+	{
+		$where = array('id' => $id);
+		$this->M_admin->delete($where, 'tb_databergolong');
+		redirect('admin/data_tunggal');
+	}
 
-    //data aset
-    public function aset()
-    {
-        $data['title'] = 'Halaman Master Data Aset';
-        $data['account'] = $this->db->get_where('tb_user', ['email' =>
-        $this->session->userdata('email')])->row_array();
+	public function edit_tunggal($id)
+	{
+		$where = array('id' => $id);
+		$data['tunggal'] = $this->M_admin->edit($where, 'tb_databergolong')->result();
 
-        $data['dataaset'] = $this->M_admin->get_dataaset();
-        $data['aset'] = $this->db->get('tb_lokasi')->result_array();
+		$data['account'] = $this->db->get_where('tb_user', ['email' =>
+		$this->session->userdata('email')])->row_array();
 
-        $this->form_validation->set_rules('id_lokasi', 'Nama Lab', 'required');
-        $this->form_validation->set_rules('nama_barang', 'Nama Barang', 'required');
-        $this->form_validation->set_rules('spesifikasi', 'Spesifikasi', 'required');
-        $this->form_validation->set_rules('jumlah', 'Jumlah', 'required');
-        $this->form_validation->set_rules('satuan', 'Satuan', 'required');
-        $this->form_validation->set_rules('keterangan', 'Keterangan', 'required');
+		$data['title'] = "Edit Data Tunggal";
+		$this->load->view('templates/header', $data);
+		$this->load->view('admin/sidebar', $data);
+		$this->load->view('templates/topbar', $data);
+		$this->load->view('admin/edit_data_tunggal', $data);
+		$this->load->view('templates/footer');
+	}
 
-        if ($this->form_validation->run() == FALSE) {
-            $this->load->view('templates/header', $data);
-            $this->load->view('admin/sidebar', $data);
-            $this->load->view('templates/topbar', $data);
-            $this->load->view('admin/aset', $data);
-            $this->load->view('templates/footer');
-        } else {
-            $gambar = array(
-                'allowed_types' => 'jpg|JPG|jpeg|gif|png|bmp',
-                'upload_path'  => realpath('./upload/image')
-            );
-            $this->load->library('upload', $gambar);
-            $this->upload->do_upload('image');
-            $data = [
-                'id_lokasi'     => $this->input->post('id_lokasi'),
-                'nama_barang'   => $this->input->post('nama_barang'),
-                'spesifikasi'   => $this->input->post('spesifikasi'),
-                'jumlah'        => $this->input->post('jumlah'),
-                'satuan'        => $this->input->post('satuan'),
-                'keterangan'    => $this->input->post('keterangan'),
-                'foto'          => $_FILES['image']['name']
+	public function update_skor()
+	{
+		$id     = $this->input->post('id');
+		$skor   = $this->input->post('skor');
 
-            ];
+		$data = array(
+			'skor'     => $skor,
+		);
 
-            $this->db->insert('tb_aset', $data);
-            $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">New Data Lokasi Added!</div>');
-            redirect('admin/aset');
-        }
-    }
+		$where = array(
+			'id'       => $id
+		);
 
-    public function delete_aset($id)
-    {
-        $where = array('kode_aset' => $id);
-        $this->M_admin->delete($where, 'tb_aset');
-        redirect('admin/aset');
-    }
-    //end aset
+		$this->M_admin->update($where, $data, 'tb_databergolong');
+		redirect('admin/data_tunggal');
+	}
 
-    //data pelaporan
-    public function pelaporan()
-    {
-        $data['title'] = 'Halaman Pelaporan';
-        $data['account'] = $this->db->get_where('tb_user', ['email' =>
-        $this->session->userdata('email')])->row_array();
+	//data bergolong
+	public function data_bergolong()
+	{
+		$this->load->model('M_admin');
+		$data = $this->M_admin->getDataBergolong();
 
-        $this->load->view('templates/header', $data);
-        $this->load->view('admin/sidebar', $data);
-        $this->load->view('templates/topbar', $data);
-        $this->load->view('admin/pelaporan', $data);
-        $this->load->view('templates/footer');
-    }
-    //end data pelaporan
+		foreach ($data as $val) {
 
-    public function profile()
-    {
-        $data['title'] = 'My Profile';
-        $data['account'] = $this->db->get_where('tb_user', ['email' =>
-        $this->session->userdata('email')])->row_array();
+			$maksimum = $val['Maksimal'];
+			$minimum = $val['Minimal'];
+			$jumlah = $val['Jumlah'];
+		}
 
-        $this->load->view('templates/header', $data);
-        $this->load->view('admin/sidebar', $data);
-        $this->load->view('templates/topbar', $data);
-        $this->load->view('admin/profile', $data);
-        $this->load->view('templates/footer');
-    }
+		$n_r = 0; //rentangan
+		$n_r = $maksimum - $minimum; //rentangan
+		$n_k = ceil(1 + 3.33 * log10($jumlah)); //kelas
+		$n_i = ceil($n_r / $n_k); //interval
+
+		$xatas = 0;
+		$xbawah = 0;
+		$xbawah = $minimum;
+		$nfo = 0;
+		$nfrel = 0;
+		$ntengah = 0;
+		$npersen = 0;
+
+		$this->db->empty_table('data_bergolong');
+		for ($i = 0; $i < $n_k; $i++) {
+			$xatas = $xbawah + $n_i - 1;
+			$data = $this->db->query('SELECT COUNT(skor) AS frekwensi FROM tb_databergolong
+				 where ((skor>=' . $xbawah . ') and (skor<=' . $xatas . '))')->row_array();
+
+			$nfo = $data['frekwensi'];
+			$ntengah = ($xbawah + $xatas) / 2;
+			$npersen = $nfo / $jumlah * 100;
+			$nfrel = $nfrel + $nfo;
+
+			$data_insert = array(
+				'xatas' => $xatas,
+				'xbawah' => $xbawah,
+				'median' => $ntengah,
+				'frekwensi' => $nfo,
+				'frewensi_relatif' => $nfrel,
+				'presentase' => $npersen
+			);
+		}
+		//menampilkan data bergolong
+
+		$this->db->insert('data_bergolong', $data_insert);
+		$xbawah = $xatas + 1;
+		if ($xbawah > $maksimum) {
+			return false;
+		}
+		$data['dataBergolong'] = $this->M_admin->getAllDataBergolong();
+
+		$data['title'] = 'Data Bergolong';
+		$data['account'] = $this->db->get_where('tb_user', ['email' =>
+		$this->session->userdata('email')])->row_array();
+
+
+		$this->load->view('templates/header', $data);
+		$this->load->view('admin/sidebar', $data);
+		$this->load->view('templates/topbar', $data);
+		$this->load->view('admin/data_bergolong', $data);
+		$this->load->view('templates/footer');
+	}
 }
